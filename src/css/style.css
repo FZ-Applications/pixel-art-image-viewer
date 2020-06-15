@@ -1,0 +1,17 @@
+.leftButton{
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+
+.leftButton:hover{
+    -fx-background-color: linear-gradient(from 0% 50% to 100% 50%, rgba(196,196,196,1), rgba(255,255,255,0));
+}
+
+.rightButton {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+
+.rightButton:hover{
+    -fx-background-color: linear-gradient(from 0% 50% to 100% 50%, rgba(255,255,255,0), rgba(196,196,196,1));
+}
