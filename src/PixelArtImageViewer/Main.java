@@ -3,10 +3,7 @@
  * Link: https://gist.github.com/james-d/ce5ec1fd44ce6c64e81a
  *
  * TODO:
- *  Check if is image
- *  Other High Res Icon
- *  Open Pixel Art Image (in Context Menu)
- *  Increase max zoom
+ *  Increase minimal zoom
  */
 
 
