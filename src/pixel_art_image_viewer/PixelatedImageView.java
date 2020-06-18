@@ -3,7 +3,7 @@
  * Link: https://stackoverflow.com/questions/16089304/javafx-imageview-without-any-smoothing/43192263
  */
 
-package PixelArtImageViewer;
+package pixel_art_image_viewer;
 
 import com.sun.javafx.sg.prism.NGImageView;
 import com.sun.javafx.sg.prism.NGNode;

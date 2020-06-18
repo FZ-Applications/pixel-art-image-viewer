@@ -7,7 +7,7 @@
  */
 
 
-package PixelArtImageViewer;
+package pixel_art_image_viewer;
 
 import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
@@ -173,12 +173,11 @@ public class Main extends Application {
 
     private void GetImage(boolean direction) { //direction true = one file up / left
 
-        File[] listOfFiles = new File(imageDirectory).listFiles();
+        File[] listOfFiles = new File(imageDirectory).listFiles((dir, name) -> isSupportedFileType(name));
 
-        assert listOfFiles != null;
-        if (direction) {
-            for (int i = 0; i < listOfFiles.length; i++) {
-                if (listOfFiles[i].isFile() && isSupportedFileType(listOfFiles[i].getAbsolutePath())) {
+        if (listOfFiles != null) {
+            if (direction) {
+                for (int i = 0; i < listOfFiles.length; i++) {
                     if (listOfFiles[i].getAbsolutePath().equals(imagePath)) {
                         if (i != 0) {
                             setNewImage(listOfFiles[i - 1].getAbsolutePath());
@@ -188,10 +187,8 @@ public class Main extends Application {
                         break;
                     }
                 }
-            }
-        } else {
-            for (int i = 0; i < listOfFiles.length; i++) {
-                if (listOfFiles[i].isFile() && isSupportedFileType(listOfFiles[i].getAbsolutePath())) {
+            } else {
+                for (int i = 0; i < listOfFiles.length; i++) {
                     if (listOfFiles[i].getAbsolutePath().equals(imagePath)) {
                         if (i != listOfFiles.length - 1) {
                             setNewImage(listOfFiles[i + 1].getAbsolutePath());
@@ -255,12 +252,13 @@ public class Main extends Application {
         resetZoom(imageView, width, height);
     }
 
-    private boolean isSupportedFileType(String absolutePath) {
-        String fileExtension = getFileExtension(absolutePath);
-        for (String ex : SUPPORTED_FILE_TYPES) {
-            assert fileExtension != null;
-            if (fileExtension.equals(ex)) {
-                return true;
+    private boolean isSupportedFileType(String name) {
+        String fileExtension = getFileExtension(name);
+        if(fileExtension != null) {
+            for (String ex : SUPPORTED_FILE_TYPES) {
+                if (fileExtension.equals(ex)) {
+                    return true;
+                }
             }
         }
         return false;
