@@ -39,7 +39,7 @@ public class Main extends Application {
         if (args.length != 0 && args[0] != null && !args[0].equals("")) {
             imagePath = args[0];
         } else {
-            imagePath = "/images/icon.png";
+            imagePath = "/images/icon.png"; //Open test images
         }
         launch(args);
     }
@@ -47,19 +47,14 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-        primaryStage.widthProperty().addListener((obs, oldVal, newVal) -> {
-            //Resize window:
-            resetZoom(imageView, width, height);
-        });
-
         imageView = new PixelatedImageView();
         imageView.setPreserveRatio(true);
         imageView.setPickOnBounds(true); //Events also work on transparent parts of the image
         setNewImage(imagePath);
 
-        ObjectProperty<Point2D> mouseDown = new SimpleObjectProperty<>();
-
         //region Event handlers:
+
+        ObjectProperty<Point2D> mouseDown = new SimpleObjectProperty<>();
 
         imageView.setOnMousePressed(e -> {
             Point2D mousePress = imageViewToImage(imageView, new Point2D(e.getX(), e.getY()));
@@ -137,6 +132,24 @@ public class Main extends Application {
 
         //endregion
 
+        //region Next image button:
+        Button rightButton = new Button();
+        rightButton.setMaxHeight(Double.MAX_VALUE);
+        rightButton.setPrefWidth(100);
+        rightButton.setGraphic(new ImageView(new Image("/images/rightButton.png")));
+        rightButton.getStyleClass().add("rightButton");
+        rightButton.setOnAction(e -> GetImage(false));
+        //endregion
+
+        //region Previous image button:
+        Button leftButton = new Button();
+        leftButton.setMaxHeight(Double.MAX_VALUE);
+        leftButton.setPrefWidth(100);
+        leftButton.setGraphic(new ImageView(new Image("/images/leftButton.png")));
+        leftButton.getStyleClass().add("leftButton");
+        leftButton.setOnAction(e -> GetImage(true));
+        //endregion
+
         BorderPane imageContainer = new BorderPane();
         imageView.fitWidthProperty().bind(imageContainer.widthProperty());
         imageView.fitHeightProperty().bind(imageContainer.heightProperty());
@@ -145,22 +158,6 @@ public class Main extends Application {
         BorderPane container = new BorderPane();
         container.setPadding(new Insets(50, 50, 50, 50));
         container.setCenter(imageContainer);
-
-        //Next image button:
-        Button rightButton = new Button();
-        rightButton.setMaxHeight(Double.MAX_VALUE);
-        rightButton.setPrefWidth(100);
-        rightButton.setGraphic(new ImageView(new Image("/images/rightButton.png")));
-        rightButton.getStyleClass().add("rightButton");
-        rightButton.setOnAction(e -> GetImage(false));
-
-        //Previous image button:
-        Button leftButton = new Button();
-        leftButton.setMaxHeight(Double.MAX_VALUE);
-        leftButton.setPrefWidth(100);
-        leftButton.setGraphic(new ImageView(new Image("/images/leftButton.png")));
-        leftButton.getStyleClass().add("leftButton");
-        leftButton.setOnAction(e -> GetImage(true));
 
         StackPane root = new StackPane(container, rightButton, leftButton);
         StackPane.setAlignment(rightButton, Pos.CENTER_RIGHT);
