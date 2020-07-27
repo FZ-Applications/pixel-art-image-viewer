@@ -1,17 +1,14 @@
 /*
  * Parts of the code are made by james-d, clarkbean710 and ajeje93
  * Link: https://gist.github.com/james-d/ce5ec1fd44ce6c64e81a
- *
- * TODO:
- *  Increase minimal zoom
  */
-
 
 package pixel_art_image_viewer;
 
 import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -50,8 +47,14 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
 
+        primaryStage.widthProperty().addListener((obs, oldVal, newVal) -> {
+            //Resize window:
+            resetZoom(imageView, width, height);
+        });
+
         imageView = new PixelatedImageView();
         imageView.setPreserveRatio(true);
+        imageView.setPickOnBounds(true); //Events also work on transparent parts of the image
         setNewImage(imagePath);
 
         ObjectProperty<Point2D> mouseDown = new SimpleObjectProperty<>();
@@ -139,6 +142,10 @@ public class Main extends Application {
         imageView.fitHeightProperty().bind(imageContainer.heightProperty());
         imageContainer.setCenter(imageView);
 
+        BorderPane container = new BorderPane();
+        container.setPadding(new Insets(50, 50, 50, 50));
+        container.setCenter(imageContainer);
+
         //Next image button:
         Button rightButton = new Button();
         rightButton.setMaxHeight(Double.MAX_VALUE);
@@ -155,7 +162,7 @@ public class Main extends Application {
         leftButton.getStyleClass().add("leftButton");
         leftButton.setOnAction(e -> GetImage(true));
 
-        StackPane root = new StackPane(imageContainer, rightButton, leftButton);
+        StackPane root = new StackPane(container, rightButton, leftButton);
         StackPane.setAlignment(rightButton, Pos.CENTER_RIGHT);
         StackPane.setAlignment(leftButton, Pos.CENTER_LEFT);
 
