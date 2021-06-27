@@ -71,7 +71,7 @@ public class CheckForUpdatesTask extends Task<String> {
      */
     private Version getVersionFromURL(String downloadURL) {
         String version = downloadURL.substring(0, downloadURL.lastIndexOf('/')); //Remove unused chars after of the version
-        version = version.substring(version.lastIndexOf('/' + 2)); //Remove unused chars in front of the version
+        version = version.substring(version.lastIndexOf('/') + 2); //Remove unused chars in front of the version
         return new Version(version);
     }
 

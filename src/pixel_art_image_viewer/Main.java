@@ -39,7 +39,7 @@ public class Main extends Application {
     /**
      * Used for automatic update checks
      */
-    private static final Version VERSION = new Version("1.1.0");
+    private static final Version VERSION = new Version("1.0.2");
     private static final int MIN_PIXELS = 10;
     private static final double ZOOM_SPEED = 1.005f;
     private static final boolean ZOOM_INVERTED = false;
@@ -204,7 +204,7 @@ public class Main extends Application {
                     if (!checkForUpdatesTask.get().isEmpty()) {
                         ButtonType updateButton = new ButtonType("Update", ButtonBar.ButtonData.OK_DONE);
                         ButtonType skipUpdateButton = new ButtonType("Skip Update", ButtonBar.ButtonData.CANCEL_CLOSE);
-                        Alert alert = new Alert(Alert.AlertType.WARNING,
+                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
                                 "A new update (v" + checkForUpdatesTask.newVersion.get() + ") is available. Do you want to update this software?",
                                 skipUpdateButton, updateButton);
 
