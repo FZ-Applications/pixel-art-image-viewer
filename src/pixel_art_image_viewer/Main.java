@@ -13,21 +13,39 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import pixel_art_image_viewer.updater.CheckForUpdatesTask;
+import pixel_art_image_viewer.updater.DownloadTask;
+import pixel_art_image_viewer.updater.Version;
+import view.PixelatedImageView;
+import view.updater.ProgressBarWindow;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 public class Main extends Application {
 
+    /**
+     * Used for automatic update checks
+     */
+    private static final Version VERSION = new Version("1.1.0");
     private static final int MIN_PIXELS = 10;
     private static final double ZOOM_SPEED = 1.005f;
     private static final boolean ZOOM_INVERTED = false;
-    private static String[] SUPPORTED_FILE_TYPES = { "png", "jpeg", "gif", "bmp" };
+    private static final String[] SUPPORTED_FILE_TYPES = {"png", "jpeg", "gif", "bmp"};
 
+    private static Stage stage;
     private static PixelatedImageView imageView;
     private static Image image;
     private static String imageDirectory;
@@ -39,7 +57,7 @@ public class Main extends Application {
         if (args.length != 0 && args[0] != null && !args[0].equals("")) {
             imagePath = args[0];
         } else {
-            imagePath = "/images/icon.png"; //Open test images
+            imagePath = "src/view/images/icon.png"; //Open test images
         }
         launch(args);
     }
@@ -47,10 +65,10 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
 
+        stage = primaryStage;
         imageView = new PixelatedImageView();
         imageView.setPreserveRatio(true);
         imageView.setPickOnBounds(true); //Events also work on transparent parts of the image
-        setNewImage(imagePath);
 
         //region Event handlers:
 
@@ -75,7 +93,6 @@ public class Main extends Application {
             }
 
             Rectangle2D viewport = imageView.getViewport();
-
             double scale = clamp(Math.pow(ZOOM_SPEED, delta),
                     //Limit minimal zoom
                     Math.min(MIN_PIXELS / viewport.getWidth(), MIN_PIXELS / viewport.getHeight()),
@@ -136,7 +153,7 @@ public class Main extends Application {
         Button rightButton = new Button();
         rightButton.setMaxHeight(Double.MAX_VALUE);
         rightButton.setPrefWidth(100);
-        rightButton.setGraphic(new ImageView(new Image("/images/rightButton.png")));
+        rightButton.setGraphic(new ImageView(new Image("/view/images/rightButton.png")));
         rightButton.getStyleClass().add("rightButton");
         rightButton.setOnAction(e -> GetImage(false));
         //endregion
@@ -145,7 +162,7 @@ public class Main extends Application {
         Button leftButton = new Button();
         leftButton.setMaxHeight(Double.MAX_VALUE);
         leftButton.setPrefWidth(100);
-        leftButton.setGraphic(new ImageView(new Image("/images/leftButton.png")));
+        leftButton.setGraphic(new ImageView(new Image("/view/images/leftButton.png")));
         leftButton.getStyleClass().add("leftButton");
         leftButton.setOnAction(e -> GetImage(true));
         //endregion
@@ -164,15 +181,69 @@ public class Main extends Application {
         StackPane.setAlignment(leftButton, Pos.CENTER_LEFT);
 
         Scene primaryScene = new Scene(root);
-        primaryScene.getStylesheets().add("/css/style.css");
+        primaryScene.getStylesheets().add("/view/css/style.css");
 
         primaryStage.setScene(primaryScene);
         primaryStage.setMaximized(true);
         primaryStage.setMinHeight(500);
         primaryStage.setMinWidth(500);
         primaryStage.setTitle("Pixel Art Image Viewer");
-        primaryStage.getIcons().add(new Image(Main.class.getResourceAsStream("/images/icon.png")));
+        primaryStage.getIcons().add(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("/view/images/icon.png"))));
         primaryStage.show();
+
+        //Show image:
+        setNewImage(imagePath);
+
+        try {
+            ConfigurationManager configurationManager = new ConfigurationManager();
+
+            //Start Check for updates task:
+            CheckForUpdatesTask checkForUpdatesTask = new CheckForUpdatesTask(VERSION, configurationManager);
+            checkForUpdatesTask.setOnSucceeded(e -> {
+                try {
+                    if (!checkForUpdatesTask.get().isEmpty()) {
+                        ButtonType updateButton = new ButtonType("Update", ButtonBar.ButtonData.OK_DONE);
+                        ButtonType skipUpdateButton = new ButtonType("Skip Update", ButtonBar.ButtonData.CANCEL_CLOSE);
+                        Alert alert = new Alert(Alert.AlertType.WARNING,
+                                "A new update (v" + checkForUpdatesTask.newVersion.get() + ") is available. Do you want to update this software?",
+                                skipUpdateButton, updateButton);
+
+                        alert.setTitle("Pixel Art Image Viewer Update");
+                        Optional<ButtonType> result = alert.showAndWait();
+
+                        if (result.isPresent()) {
+                            ButtonType buttonType = result.get();
+                            if (updateButton.equals(buttonType)) {
+                                startUpdate(configurationManager, checkForUpdatesTask.get());
+                            } else if (skipUpdateButton.equals(buttonType)) {
+                                configurationManager.setSkippedUpdateVersion(checkForUpdatesTask.newVersion.get());
+                            }
+                        }
+                    }
+                } catch (ExecutionException | InterruptedException executionException) {
+                    executionException.printStackTrace();
+                }
+            });
+
+            new Thread(checkForUpdatesTask).start();
+
+        } catch (ParseException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void startUpdate(ConfigurationManager configurationManager, String downloadURL) {
+        ProgressBarWindow progressBarWindow = new ProgressBarWindow();
+
+        DownloadTask downloadTask = new DownloadTask(configurationManager, downloadURL);
+        downloadTask.setOnSucceeded(e2 -> {
+            progressBarWindow.close();
+        });
+
+        progressBarWindow.bind(downloadTask);
+
+        Thread thread = new Thread(downloadTask);
+        thread.start();
     }
 
     private void GetImage(boolean direction) { //direction true = one file up / left
@@ -258,7 +329,7 @@ public class Main extends Application {
 
     private boolean isSupportedFileType(String name) {
         String fileExtension = getFileExtension(name);
-        if(fileExtension != null) {
+        if (fileExtension != null) {
             for (String ex : SUPPORTED_FILE_TYPES) {
                 if (fileExtension.equals(ex)) {
                     return true;

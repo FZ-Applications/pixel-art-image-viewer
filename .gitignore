@@ -114,3 +114,5 @@ modules.xml
 hs_err_pid*
 
 # End of https://www.gitignore.io/api/java,intellij+all
+/PixelArtImageViewer Compile/Pixel Art Image Viewer 1.0.3 Setup.exe
+/PixelArtImageViewer Compile/Pixel Art Image Viewer.exe
