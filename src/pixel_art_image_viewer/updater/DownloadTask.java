@@ -1,7 +1,6 @@
 package pixel_art_image_viewer.updater;
 
 import javafx.concurrent.Task;
-import pixel_art_image_viewer.ConfigurationManager;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -9,11 +8,9 @@ import java.net.URL;
 
 public class DownloadTask extends Task<Void> {
 
-    private ConfigurationManager configurationManager;
     private String downloadURL;
 
-    public DownloadTask(ConfigurationManager configurationManager, String downloadURL) {
-        this.configurationManager = configurationManager;
+    public DownloadTask(String downloadURL) {
         this.downloadURL = downloadURL;
     }
 
@@ -23,12 +20,16 @@ public class DownloadTask extends Task<Void> {
     @Override
     protected Void call() {
         try {
-            URL url = new URL("https://downloads.sourceforge.net/project/pixel-art-image-viewer/v1.0.2/Pixel.Art.Image.Viewer.1.0.2.Setup.exe");
+            //Force usage of https:
+            downloadURL = downloadURL.replace("http", "https");
+
+            URL url = new URL(downloadURL);
 
             long completeFileSize = getFileSize(url);
 
             //Get temp directory:
-            String installPath = System.getProperty("java.io.tmpdir") + url.toString().substring(url.toString().lastIndexOf('/'));
+            String installPath = System.getProperty("java.io.tmpdir") + url.toString().substring(url.toString().lastIndexOf('/')).substring(1);
+            System.out.println(installPath);
 
             try(BufferedInputStream in = new BufferedInputStream(url.openStream());
                 FileOutputStream fos = new FileOutputStream(installPath);

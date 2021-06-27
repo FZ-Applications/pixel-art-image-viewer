@@ -29,6 +29,7 @@ import view.updater.ProgressBarWindow;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.Objects;
 import java.util.Optional;
@@ -39,13 +40,12 @@ public class Main extends Application {
     /**
      * Used for automatic update checks
      */
-    private static final Version VERSION = new Version("1.0.2");
+    private static final Version VERSION = new Version("1.1.0");
     private static final int MIN_PIXELS = 10;
     private static final double ZOOM_SPEED = 1.005f;
     private static final boolean ZOOM_INVERTED = false;
     private static final String[] SUPPORTED_FILE_TYPES = {"png", "jpeg", "gif", "bmp"};
 
-    private static Stage stage;
     private static PixelatedImageView imageView;
     private static Image image;
     private static String imageDirectory;
@@ -65,7 +65,6 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-        stage = primaryStage;
         imageView = new PixelatedImageView();
         imageView.setPreserveRatio(true);
         imageView.setPickOnBounds(true); //Events also work on transparent parts of the image
@@ -214,7 +213,7 @@ public class Main extends Application {
                         if (result.isPresent()) {
                             ButtonType buttonType = result.get();
                             if (updateButton.equals(buttonType)) {
-                                startUpdate(configurationManager, checkForUpdatesTask.get());
+                                startUpdate(checkForUpdatesTask.get());
                             } else if (skipUpdateButton.equals(buttonType)) {
                                 configurationManager.setSkippedUpdateVersion(checkForUpdatesTask.newVersion.get());
                             }
@@ -232,13 +231,11 @@ public class Main extends Application {
         }
     }
 
-    private void startUpdate(ConfigurationManager configurationManager, String downloadURL) {
+    private void startUpdate(String downloadURL) {
         ProgressBarWindow progressBarWindow = new ProgressBarWindow();
 
-        DownloadTask downloadTask = new DownloadTask(configurationManager, downloadURL);
-        downloadTask.setOnSucceeded(e2 -> {
-            progressBarWindow.close();
-        });
+        DownloadTask downloadTask = new DownloadTask(downloadURL);
+        downloadTask.setOnSucceeded(e2 -> progressBarWindow.close());
 
         progressBarWindow.bind(downloadTask);
 
