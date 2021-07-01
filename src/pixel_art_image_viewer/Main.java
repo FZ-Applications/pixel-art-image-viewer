@@ -154,7 +154,7 @@ public class Main extends Application {
         rightButton.setPrefWidth(100);
         rightButton.setGraphic(new ImageView(new Image("/view/images/rightButton.png")));
         rightButton.getStyleClass().add("rightButton");
-        rightButton.setOnAction(e -> GetImage(false));
+        rightButton.setOnAction(e -> GetImage(Direction.Right));
         //endregion
 
         //region Previous image button:
@@ -163,7 +163,7 @@ public class Main extends Application {
         leftButton.setPrefWidth(100);
         leftButton.setGraphic(new ImageView(new Image("/view/images/leftButton.png")));
         leftButton.getStyleClass().add("leftButton");
-        leftButton.setOnAction(e -> GetImage(true));
+        leftButton.setOnAction(e -> GetImage(Direction.Left));
         //endregion
 
         BorderPane imageContainer = new BorderPane();
@@ -243,12 +243,12 @@ public class Main extends Application {
         thread.start();
     }
 
-    private void GetImage(boolean direction) { //direction true = one file up / left
+    private void GetImage(Direction direction) {
 
         File[] listOfFiles = new File(imageDirectory).listFiles((dir, name) -> isSupportedFileType(name));
 
         if (listOfFiles != null) {
-            if (direction) {
+            if (direction == Direction.Left) {
                 for (int i = 0; i < listOfFiles.length; i++) {
                     if (listOfFiles[i].getAbsolutePath().equals(imagePath)) {
                         if (i != 0) {
@@ -342,5 +342,10 @@ public class Main extends Application {
             return fileName.substring(i + 1).toLowerCase();
         }
         return null;
+    }
+
+    private enum FileDirection {
+        Left,
+        Right
     }
 }
