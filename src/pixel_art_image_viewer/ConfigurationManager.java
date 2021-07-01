@@ -32,7 +32,7 @@ public class ConfigurationManager {
             checkForUpdates = true;
             skippedUpdateVersion = "0.0.0";
             lastCheckedForUpdates = dateFormatter.parse("01,01,0001");
-            checkForUpdatesEveryXDays = 7;
+            checkForUpdatesEveryXDays = 1;
             saveConfig();
         }
 
