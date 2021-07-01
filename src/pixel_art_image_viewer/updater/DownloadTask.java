@@ -29,7 +29,6 @@ public class DownloadTask extends Task<Void> {
 
             //Get temp directory:
             String installPath = System.getProperty("java.io.tmpdir") + url.toString().substring(url.toString().lastIndexOf('/')).substring(1);
-            System.out.println(installPath);
 
             try(BufferedInputStream in = new BufferedInputStream(url.openStream());
                 FileOutputStream fos = new FileOutputStream(installPath);

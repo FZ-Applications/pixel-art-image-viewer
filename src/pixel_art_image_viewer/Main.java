@@ -29,7 +29,6 @@ import view.updater.ProgressBarWindow;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,14 +36,12 @@ import java.util.concurrent.ExecutionException;
 
 public class Main extends Application {
 
-    /**
-     * Used for automatic update checks
-     */
-    private static final Version VERSION = new Version("1.1.0");
+    /** Used for automatic update checks */
+    private static final Version VERSION = new Version("1.1.1");
     private static final int MIN_PIXELS = 10;
     private static final double ZOOM_SPEED = 1.005f;
     private static final boolean ZOOM_INVERTED = false;
-    private static final String[] SUPPORTED_FILE_TYPES = {"png", "jpeg", "gif", "bmp"};
+    private static final String[] SUPPORTED_FILE_TYPES = {"png", "jpg", "jpeg", "gif", "bmp"};
 
     private static PixelatedImageView imageView;
     private static Image image;
@@ -56,9 +53,8 @@ public class Main extends Application {
     public static void main(String[] args) {
         if (args.length != 0 && args[0] != null && !args[0].equals("")) {
             imagePath = args[0];
-        } else {
-            imagePath = "src/view/images/icon.png"; //Open test images
         }
+
         launch(args);
     }
 
@@ -315,13 +311,39 @@ public class Main extends Application {
 
     private void setNewImage(String newPath) {
         imagePath = newPath;
-        File file = new File(imagePath);
-        imageDirectory = file.getParent();
-        image = new Image(file.toURI().toString());
+
+        //Get valid image:
+        if(isValidImage()){
+            //Get image from path:
+            File f = new File(imagePath);
+            imageDirectory = new File(imagePath).getParent();
+            image = new Image(f.toURI().toString());
+        }else{
+            //Get invalid image:
+            imageDirectory = "";
+            image = new Image(Objects.requireNonNull(Main.class.getResourceAsStream("/view/images/icon.png")));
+        }
+
         imageView.setImage(image);
         width = image.getWidth();
         height = image.getHeight();
         resetZoom(imageView, width, height);
+    }
+
+    /** Returns if the image path and image is valid. */
+    private boolean isValidImage() {
+        boolean isValid = true;
+        
+        if(imagePath != null){
+            //Check if image is isValid:
+            if(!new File(imagePath).exists()){
+                isValid = false;
+            }
+        }else {
+            isValid = false;
+        }
+
+        return isValid;
     }
 
     private boolean isSupportedFileType(String name) {

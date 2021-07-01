@@ -1,5 +1,5 @@
 #define MyAppName "Pixel Art Image Viewer"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.1.1"
 #define MyAppPublisher "FZ Applications"
 #define MyAppURL "https://github.com/FZ-Applications/Pixel_Art_Image_Viewer"
 #define MyAppExeName "Pixel Art Image Viewer.exe"

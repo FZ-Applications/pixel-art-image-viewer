@@ -17,7 +17,6 @@ The software requires JRE 1.8 and only runs on Windows.
 
 ## Known Issues
 - When resizing, the image doesn't scale
-- Left / Right buttons don't work correct sometimes
 
 ## Contribute
 Contributions are always welcome!
